@@ -1,10 +1,11 @@
 from lib.print import success, warning, danger
 import pandas as pd
 
+
 def load_csv(filename: str) -> pd.DataFrame:
     try:
         df = pd.read_csv(filename, header=None)
-    except:
+    except FileNotFoundError:
         print(f"{danger('Error: ')}{danger('File not found')}")
     return df
 
