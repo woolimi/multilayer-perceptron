@@ -86,6 +86,7 @@ The backward pass involves computing the gradients of the loss function with res
 
 ## Resources
 
+- [Coursera machine learning - advanced learning algorithm](https://www.coursera.org/learn/advanced-learning-algorithms/home/week/1)
 - [Neural Networks from Scratch in Python](https://www.youtube.com/playlist?list=PLQVvvaa0QuDcjD5BAw2DxE6OF2tius3V3)
 
 ## Bonus
