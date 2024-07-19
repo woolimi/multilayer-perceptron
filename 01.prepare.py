@@ -1,10 +1,25 @@
-from lib.mlp import load_csv, standardize
-from lib.print import success, warning
+from lib.print import success, warning, danger
 import pandas as pd
 
+def load_csv(filename: str) -> pd.DataFrame:
+    try:
+        df = pd.read_csv(filename, header=None)
+    except:
+        print(f"{danger('Error: ')}{danger('File not found')}")
+    return df
 
-# Program to load dataset and separate into train and test
+def standardize(df: pd.DataFrame) -> pd.DataFrame:
+    # Standardize only the numeric columns
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    df[numeric_cols] = (df[numeric_cols] - df[numeric_cols].mean()) / df[numeric_cols].std()
+
+    return df
+
 if __name__ == "__main__":
+    """
+    Program to load dataset and separate into train and test
+    """
+    
     df = load_csv("./data.csv")
 
     print(warning("Removing first column..."))

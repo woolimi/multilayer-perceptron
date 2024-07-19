@@ -1,3 +1,4 @@
 test.csv
 train.csv
 __pycache__
+trained.json
