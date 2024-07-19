@@ -9,7 +9,7 @@ def softmax(z):
 
 def relu_backward(dA, z):
     dZ = dA.copy()
-    dZ[z <= 0] = 0
+    dZ[z <= 0] = 0 # Derivative of ReLU
     return dZ
 
 def softmax_backward(dA):

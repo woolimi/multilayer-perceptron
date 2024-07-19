@@ -1,4 +1,6 @@
 test.csv
 train.csv
+validate.csv
 __pycache__
 trained.json
+*.png

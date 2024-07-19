@@ -12,9 +12,8 @@ if __name__ == "__main__":
     model = Model().load_model_from_json('trained.json')    
 
     # Make predictions
-    y_pred = model.predict(X)
-    print(f"Accuracy: {np.sum(y == y_pred) / len(y) * 100 :.2f}")
+    print(f"Accuracy: {model.accuracy(X, y) :.2f}")
 
     # Evaluate predictions using binary cross-entropy
-    # loss = model.binary_cross_entropy(y, y_pred)
-    # print(f'Binary Cross-Entropy Loss: {loss}')
+    loss = model.binary_cross_entropy(y, model.predict(X))
+    print(f'Binary Cross-Entropy Loss: {loss}')

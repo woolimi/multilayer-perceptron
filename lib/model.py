@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import json
 from lib.layer import InputLayer, DenseLayer
@@ -5,6 +6,10 @@ from lib.layer import InputLayer, DenseLayer
 class Model:
     def __init__(self):
         self.layers = []
+        self.training_loss = []
+        self.validation_loss = []
+        self.training_accuracy = []
+        self.validation_accuracy = []
         self.inputLayer = None        
 
     def create_network(self, layers):
@@ -14,20 +19,15 @@ class Model:
         self.layers = layers[1:]
         return self
     
-    def forward(self, X):
+    def forward(self, X, training=True):
         output = X
         for layer in self.layers:
-            output = layer.forward(output)
+            output = layer.forward(output, training)
         return output
-    
-    def compute_loss(self, y_true, y_pred):
+        
+    def backward(self, y_true: np.ndarray):
         m = y_true.shape[0]
-        log_likelihood = -np.log(y_pred[range(m), y_true])
-        loss = np.sum(log_likelihood) / m
-        return loss
-    
-    def backward(self, X, y_true):
-        m = y_true.shape[0]
+        # Result of last layer (softmax result)
         y_pred = self.layers[-1].a
         dA = y_pred
         dA[range(m), y_true] -= 1
@@ -38,29 +38,68 @@ class Model:
             layer.dW = dW
             layer.db = db
     
+    # w_new = w_old - learning_rate * d_J / d_w
+    # b_new = b_old - learning_rate * d_J / d_b
     def update_weights(self, learning_rate):
         for layer in self.layers:
             layer.weights -= learning_rate * layer.dW
             layer.biases -= learning_rate * layer.db
     
+    def plot_loss(self):
+        plt.plot(self.training_loss, label='Training Loss')
+        plt.plot(self.validation_loss, label='Validation Loss')
+        plt.legend()
+        plt.savefig('loss.png')
+        plt.close()
+    
+    def plot_accuracy(self):
+        plt.plot(self.training_accuracy, label='Training Accuracy')
+        plt.plot(self.validation_accuracy, label='Validation Accuracy')
+        plt.legend()
+        plt.savefig('accuracy.png')
+        plt.close()
+
     def train(self):
         X = self.inputLayer.inputs
         y = self.inputLayer.outputs
+        X_val = self.inputLayer.inputs_val
+        y_val = self.inputLayer.outputs_val
         batch_size = self.inputLayer.batch_size
         epochs = self.inputLayer.epochs
         learning_rate = self.inputLayer.learning_rate
+        self.training_loss = []
+        self.validation_loss = []
+        self.training_accuracy = []
+        self.validation_accuracy = []
 
-        for epoch in range(epochs):
+        for epoch in range(1, epochs + 1):
             batch_idx = np.random.choice(X.shape[0], size=batch_size, replace=False)
             X_batch = X[batch_idx]
-            y_batch = y[batch_idx]
+            y_batch_true = y[batch_idx]
     
-            y_pred = self.forward(X_batch)
-            loss = self.compute_loss(y_batch, y_pred)
-            self.backward(X_batch, y_batch)
+            y_batch_pred = self.forward(X_batch)
+            y_val_pred = self.predict(X_val)
+
+            # Calculate Loss
+            training_loss = self.binary_cross_entropy(y_batch_true, y_batch_pred)
+            validation_loss = self.binary_cross_entropy(y_val, y_val_pred)
+            self.training_loss.append(training_loss)
+            self.validation_loss.append(validation_loss)
+
+            # Calculate Accuracy
+            training_accuracy = self.accuracy(X_batch, y_batch_true)
+            validation_accuracy = self.accuracy(X_val, y_val)
+            self.training_accuracy.append(training_accuracy)
+            self.validation_accuracy.append(validation_accuracy)
+
+            # Update model
+            self.backward(y_batch_true)
             self.update_weights(learning_rate)
             if epoch % 100 == 0:
-                print(f'Epoch {epoch}, Loss: {loss}')
+                print(f'epoch {epoch:>4}/{epochs:>4} - loss: {training_loss:>16} - val_loss: {validation_loss:>16}')
+        
+        self.plot_loss()
+        self.plot_accuracy()
     
     def save_model_as_json(self, filename):
         model_data = []
@@ -74,7 +113,7 @@ class Model:
             model_data = json.load(f)
         for layer_data in model_data:
             if (layer_data["type"] == "InputLayer"):
-                self.inputLayer = InputLayer(np.array([[]]), np.array([[]]), 0, 0, 0)
+                self.inputLayer = InputLayer(np.array([[]]), np.array([[]]), np.array([[]]), np.array([[]]), 0, 0, 0)
             if (layer_data["type"] == "DenseLayer"):
                 denseLayer = DenseLayer(len(layer_data["biases"]), layer_data["n_neurons"], layer_data["activation"])
                 denseLayer.weights = np.array(layer_data["weights"])
@@ -83,14 +122,17 @@ class Model:
         return self
 
     def predict(self, X):
-        return self.forward(X).argmax(axis=1)
+        return self.forward(X, training=False)
+
+    def accuracy(self, X, y_true):
+        y_pred = self.predict(X)
+        return np.sum(y_true == y_pred.argmax(axis=1)) / len(y_true) * 100
     
     def binary_cross_entropy(self, y_true, y_pred):
-        m = y_true.shape[0]
         epsilon = 1e-12
+        y_pred = y_pred[:, 1] # Extract probability of class 1
         y_pred = np.clip(y_pred, epsilon, 1. - epsilon)
-        loss = -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
-        return loss
+        return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
     
     def summary(self):
         print(f"{'Layer (type)': <18} {'Output Shape': <16} {'Param #':<10} {'Activation'}")

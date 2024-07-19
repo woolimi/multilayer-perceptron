@@ -4,11 +4,16 @@ from lib.activation import relu, relu_backward, softmax, softmax_backward
 np.random.seed(42)
 
 class InputLayer:
-    def __init__(self, inputs: np.ndarray, outputs: np.ndarray, epochs: int, learning_rate: float, batch_size: int = 16):
+    def __init__(self,
+            inputs: np.ndarray, outputs: np.ndarray, 
+            inputs_val: np.ndarray, outputs_val: np.ndarray,epochs: int,
+            learning_rate: float, batch_size: int = 16):
         self.type="InputLayer"
         self.n_neurons = inputs.shape[1]
         self.inputs = inputs
         self.outputs = outputs
+        self.inputs_val = inputs_val
+        self.outputs_val = outputs_val
         self.activation = None
         self.epochs = epochs
         self.learning_rate = learning_rate
@@ -33,17 +38,20 @@ class DenseLayer:
         self.biases = np.zeros((1, n_neurons))
         self.activation = activation
     
-    def forward(self, inputs):
-        self.inputs = inputs
-        self.z = np.dot(inputs, self.weights) + self.biases
-        if self.activation == "relu":
-            self.a = relu(self.z)
-        elif self.activation == "softmax":
-            self.a = softmax(self.z)
-        else:
-            self.a = self.z  # No activation
-        return self.a
-    
+    def forward(self, inputs, training=True):
+        z = np.dot(inputs, self.weights) + self.biases
+        a = None
+        if self.activation == "softmax":
+            a = softmax(z)
+        elif self.activation == "relu" or self.activation is None:
+            a = relu(z)
+
+        if training:
+            self.inputs = inputs
+            self.z = z
+            self.a = a
+        return a
+
     
     def backward(self, dA):
         if self.activation == "relu":
