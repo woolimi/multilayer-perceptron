@@ -10,7 +10,15 @@ It is a CSV file of 32 columns, the column diagnosis being the label you want to
 
 ## Installation
 
+```bash
 pip install -r requirements.txt
+# Data processing
+python 01.prepare.py
+# Train model
+python 02.train.py
+# Predict
+python 03.predict.py
+```
 
 ## Glossary of terms
 
