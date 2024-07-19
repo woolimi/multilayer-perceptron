@@ -72,13 +72,13 @@ The backward pass involves computing the gradients of the loss function with res
 
 ![notation](https://images.prismic.io/shortcut-french/Zpq6Mh5LeNNTxUL6_notation.png?auto=format,compress)
 
-#### Output Layer (softmax) with cross-entropy loss
-
-![softmax gradient descent with cross-entropy loss](https://images.prismic.io/shortcut-french/Zpq5ph5LeNNTxULp_softmax-gradient.png?auto=format,compress)
-
 #### Steps of backpropagation
 
 ![backpropagation](https://images.prismic.io/shortcut-french/Zpq9OR5LeNNTxUMq_steps-backpropagation.png?auto=format,compress)
+
+#### Output Layer (softmax) with cross-entropy loss
+
+![softmax gradient descent with cross-entropy loss](https://images.prismic.io/shortcut-french/Zpq5ph5LeNNTxULp_softmax-gradient.png?auto=format,compress)
 
 #### Hidden layer (Relu and sigmoid)
 
