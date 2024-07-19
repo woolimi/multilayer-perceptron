@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     print(warning("\nCreating neural network model..."))
     model = Model().create_network([
-        InputLayer(X, y, X_val, y_val, epochs=8000, learning_rate=0.005, batch_size=32),
+        InputLayer(X, y, X_val, y_val, epochs=8000, learning_rate=0.005, batch_size=32, early_stop=False),
         DenseLayer(n_inputs=X.shape[1], n_neurons=20,  activation="relu"),
         DenseLayer(n_inputs=20, n_neurons=20, activation="relu"),
         DenseLayer(n_inputs=20, n_neurons=2, activation="softmax"),

@@ -2,15 +2,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 from lib.layer import InputLayer, DenseLayer
+from lib.print import warning
 
 class Model:
     def __init__(self):
         self.layers = []
-        self.training_loss = []
-        self.validation_loss = []
+        self.training_losses = []
+        self.validation_losses = []
         self.training_accuracy = []
         self.validation_accuracy = []
-        self.inputLayer = None        
+        self.inputLayer = None       
+        self.train_patience = 10
 
     def create_network(self, layers):
         if not isinstance(layers[0], InputLayer):
@@ -46,8 +48,8 @@ class Model:
             layer.biases -= learning_rate * layer.db
     
     def plot_loss(self):
-        plt.plot(self.training_loss, label='Training Loss')
-        plt.plot(self.validation_loss, label='Validation Loss')
+        plt.plot(self.training_losses, label='Training Loss')
+        plt.plot(self.validation_losses, label='Validation Loss')
         plt.legend()
         plt.savefig('loss.png')
         plt.close()
@@ -67,11 +69,8 @@ class Model:
         batch_size = self.inputLayer.batch_size
         epochs = self.inputLayer.epochs
         learning_rate = self.inputLayer.learning_rate
-        self.training_loss = []
-        self.validation_loss = []
-        self.training_accuracy = []
-        self.validation_accuracy = []
-
+        early_stop = self.inputLayer.early_stop
+        
         for epoch in range(1, epochs + 1):
             batch_idx = np.random.choice(X.shape[0], size=batch_size, replace=False)
             X_batch = X[batch_idx]
@@ -83,14 +82,22 @@ class Model:
             # Calculate Loss
             training_loss = self.binary_cross_entropy(y_batch_true, y_batch_pred)
             validation_loss = self.binary_cross_entropy(y_val, y_val_pred)
-            self.training_loss.append(training_loss)
-            self.validation_loss.append(validation_loss)
+            self.training_losses.append(training_loss)
+            self.validation_losses.append(validation_loss)
 
             # Calculate Accuracy
             training_accuracy = self.accuracy(X_batch, y_batch_true)
             validation_accuracy = self.accuracy(X_val, y_val)
             self.training_accuracy.append(training_accuracy)
             self.validation_accuracy.append(validation_accuracy)
+
+            # Early Stopping
+            if early_stop:
+                if len(self.validation_losses) > 2 and validation_loss > self.validation_losses[-2]:
+                    self.train_patience -= 1
+                if self.train_patience == 0:
+                    print(f"epoch {epoch:>4}/{epochs:>4} - Training stopped due to early stopping")
+                    break
 
             # Update model
             self.backward(y_batch_true)

@@ -7,7 +7,7 @@ class InputLayer:
     def __init__(self,
             inputs: np.ndarray, outputs: np.ndarray, 
             inputs_val: np.ndarray, outputs_val: np.ndarray,epochs: int,
-            learning_rate: float, batch_size: int = 16):
+            learning_rate: float, batch_size: int = 16, early_stop: bool = False):
         self.type="InputLayer"
         self.n_neurons = inputs.shape[1]
         self.inputs = inputs
@@ -18,6 +18,7 @@ class InputLayer:
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.batch_size = batch_size
+        self.early_stop = early_stop
     
     def count_parameters(self):
         return 0
