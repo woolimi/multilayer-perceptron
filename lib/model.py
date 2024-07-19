@@ -11,6 +11,8 @@ class Model:
         self.validation_losses = []
         self.training_accuracy = []
         self.validation_accuracy = []
+        self.training_mses = []
+        self.validation_mses = []
         self.inputLayer = None       
         self.train_patience = 10
 
@@ -31,7 +33,7 @@ class Model:
         m = y_true.shape[0]
         # Result of last layer (softmax result)
         y_pred = self.layers[-1].a
-        dA = y_pred
+        dA = y_pred.copy()
         dA[range(m), y_true] -= 1
         dA /= m
         
@@ -51,15 +53,44 @@ class Model:
         plt.plot(self.training_losses, label='Training Loss')
         plt.plot(self.validation_losses, label='Validation Loss')
         plt.legend()
-        plt.savefig('loss.png')
+        plt.savefig('plot-loss.png')
         plt.close()
     
     def plot_accuracy(self):
         plt.plot(self.training_accuracy, label='Training Accuracy')
         plt.plot(self.validation_accuracy, label='Validation Accuracy')
         plt.legend()
-        plt.savefig('accuracy.png')
+        plt.savefig('plot-accuracy.png')
         plt.close()
+    
+    def plot_mse(self):
+        plt.plot(self.training_mses, label='Training MSE')
+        plt.plot(self.validation_mses, label='Validation MSE')
+        plt.legend()
+        plt.savefig('plot-mse.png')
+        plt.close()
+
+    def get_losses(self, y_batch_pred, y_batch_true, y_val_pred, y_val):
+        training_loss = self.binary_cross_entropy(y_batch_true, y_batch_pred)
+        validation_loss = self.binary_cross_entropy(y_val, y_val_pred)
+        self.training_losses.append(training_loss)
+        self.validation_losses.append(validation_loss)
+        return training_loss, validation_loss
+    
+    def get_accuracy(self, X_batch, y_batch_true, X_val, y_val):
+        training_accuracy = self.accuracy(X_batch, y_batch_true)
+        validation_accuracy = self.accuracy(X_val, y_val)
+        self.training_accuracy.append(training_accuracy)
+        self.validation_accuracy.append(validation_accuracy)
+        return training_accuracy, validation_accuracy
+
+    # Mean Squared Error
+    def get_mse(self, y_batch_pred, y_batch_true, y_val_pred, y_val):
+        training_mse = self.mse(y_batch_true, y_batch_pred)
+        validation_mse = self.mse(y_val, y_val_pred)
+        self.training_mses.append(training_mse)
+        self.validation_mses.append(validation_mse)
+        return training_mse, validation_mse
 
     def train(self):
         X = self.inputLayer.inputs
@@ -80,16 +111,13 @@ class Model:
             y_val_pred = self.predict(X_val)
 
             # Calculate Loss
-            training_loss = self.binary_cross_entropy(y_batch_true, y_batch_pred)
-            validation_loss = self.binary_cross_entropy(y_val, y_val_pred)
-            self.training_losses.append(training_loss)
-            self.validation_losses.append(validation_loss)
+            validation_loss, training_loss = self.get_losses(y_batch_pred, y_batch_true, y_val_pred, y_val)
 
             # Calculate Accuracy
-            training_accuracy = self.accuracy(X_batch, y_batch_true)
-            validation_accuracy = self.accuracy(X_val, y_val)
-            self.training_accuracy.append(training_accuracy)
-            self.validation_accuracy.append(validation_accuracy)
+            validation_accuracy, training_accuracy = self.get_accuracy(X_batch, y_batch_true, X_val, y_val)
+
+            # Calculate Mean Squared Error
+            training_mse, validation_mse = self.get_mse(y_batch_pred, y_batch_true, y_val_pred, y_val)
 
             # Early Stopping
             if early_stop:
@@ -103,10 +131,11 @@ class Model:
             self.backward(y_batch_true)
             self.update_weights(learning_rate)
             if epoch % 100 == 0:
-                print(f'epoch {epoch:>4}/{epochs:>4} - loss: {training_loss:>16} - val_loss: {validation_loss:>16}')
+                print(f'epoch {epoch:>4}/{epochs:>4} - loss: {training_loss:>6.6f} val_loss: {validation_loss:>6.6f} acc: {training_accuracy:>3.0f}%, val_acc: {validation_accuracy:>3.0f}%, mse: {training_mse:>6.6f}, val_mse: {validation_mse:>6.6f}')
         
         self.plot_loss()
         self.plot_accuracy()
+        self.plot_mse()
     
     def save_model_as_json(self, filename):
         model_data = []
@@ -134,6 +163,10 @@ class Model:
     def accuracy(self, X, y_true):
         y_pred = self.predict(X)
         return np.sum(y_true == y_pred.argmax(axis=1)) / len(y_true) * 100
+    
+    def mse(self, y_true, y_pred):
+        y_pred = y_pred[:, 1] # Extract probability of class 1
+        return np.mean((y_true - y_pred)**2)
     
     def binary_cross_entropy(self, y_true, y_pred):
         epsilon = 1e-12

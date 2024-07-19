@@ -12,7 +12,7 @@ if __name__ == "__main__":
     model = Model().load_model_from_json('trained.json')    
 
     # Make predictions
-    print(f"Accuracy: {model.accuracy(X, y) :.2f}")
+    print(f"Accuracy: {model.accuracy(X, y) :.2f}%")
 
     # Evaluate predictions using binary cross-entropy
     loss = model.binary_cross_entropy(y, model.predict(X))

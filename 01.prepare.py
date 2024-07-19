@@ -8,6 +8,7 @@ def load_csv(filename: str) -> pd.DataFrame:
         print(f"{danger('Error: ')}{danger('File not found')}")
     return df
 
+
 def standardize(df: pd.DataFrame) -> pd.DataFrame:
     # Standardize only the numeric columns
     numeric_cols = df.select_dtypes(include=['number']).columns

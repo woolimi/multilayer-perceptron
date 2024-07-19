@@ -1,5 +1,5 @@
 import numpy as np
-from lib.activation import relu, relu_backward, softmax, softmax_backward
+from lib.activation import relu, relu_backward, softmax, softmax_backward, sigmoid, sigmoid_backward
 
 np.random.seed(42)
 
@@ -44,6 +44,8 @@ class DenseLayer:
         a = None
         if self.activation == "softmax":
             a = softmax(z)
+        elif self.activation == "sigmoid":
+            a = sigmoid(z)
         elif self.activation == "relu" or self.activation is None:
             a = relu(z)
 
@@ -57,6 +59,8 @@ class DenseLayer:
     def backward(self, dA):
         if self.activation == "relu":
             dZ = relu_backward(dA, self.z)
+        elif self.activation == "sigmoid":
+            dZ = sigmoid_backward(dA, self.z)
         elif self.activation == "softmax":
             dZ = softmax_backward(dA)
         else:
