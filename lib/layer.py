@@ -78,6 +78,6 @@ class DenseLayer:
             "type": self.type,
             "weights": self.weights.tolist(),
             "biases": self.biases.tolist(),
-            "n_neurons": len(self.biases),
+            "n_neurons": len(self.biases[0]),
             "activation": self.activation
         }

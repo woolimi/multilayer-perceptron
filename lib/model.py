@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import json
+import os
 from lib.layer import InputLayer, DenseLayer
 from lib.print import warning
 
@@ -55,13 +56,16 @@ class Model:
         plt.legend()
         plt.savefig('plot-loss.png')
         plt.close()
-    
+        # os.system("xdg-open plot-loss.png")
+
     def plot_accuracy(self):
         plt.plot(self.training_accuracy, label='Training Accuracy')
         plt.plot(self.validation_accuracy, label='Validation Accuracy')
         plt.legend()
         plt.savefig('plot-accuracy.png')
         plt.close()
+        # os.system("xdg-open plot-accuracy.png")
+
     
     def plot_mse(self):
         plt.plot(self.training_mses, label='Training MSE')
@@ -69,6 +73,8 @@ class Model:
         plt.legend()
         plt.savefig('plot-mse.png')
         plt.close()
+        # os.system("xdg-open plot-mse.png")
+
 
     def get_losses(self, y_batch_pred, y_batch_true, y_val_pred, y_val):
         training_loss = self.binary_cross_entropy(y_batch_true, y_batch_pred)
@@ -151,9 +157,10 @@ class Model:
             if (layer_data["type"] == "InputLayer"):
                 self.inputLayer = InputLayer(np.array([[]]), np.array([[]]), np.array([[]]), np.array([[]]), 0, 0, 0)
             if (layer_data["type"] == "DenseLayer"):
-                denseLayer = DenseLayer(len(layer_data["biases"]), layer_data["n_neurons"], layer_data["activation"])
+                denseLayer = DenseLayer(layer_data["n_neurons"], layer_data["n_neurons"], layer_data["activation"])
                 denseLayer.weights = np.array(layer_data["weights"])
                 denseLayer.biases = np.array(layer_data["biases"])
+
                 self.layers.append(denseLayer)
         return self
 
@@ -178,7 +185,6 @@ class Model:
         print(f"{'Layer (type)': <18} {'Output Shape': <16} {'Param #':<10} {'Activation'}")
         print("="*60)
         total_params = 0
-
         for layer in [self.inputLayer] + self.layers:
             layer_type = layer.type
             param_count = layer.count_parameters()
