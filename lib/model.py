@@ -15,7 +15,7 @@ class Model:
         self.training_mses = []
         self.validation_mses = []
         self.inputLayer = None       
-        self.train_patience = 10
+        self.train_patience = 3
 
     def create_network(self, layers):
         if not isinstance(layers[0], InputLayer):
@@ -117,10 +117,10 @@ class Model:
             y_val_pred = self.predict(X_val)
 
             # Calculate Loss
-            validation_loss, training_loss = self.get_losses(y_batch_pred, y_batch_true, y_val_pred, y_val)
+            training_loss, validation_loss = self.get_losses(y_batch_pred, y_batch_true, y_val_pred, y_val)
 
             # Calculate Accuracy
-            validation_accuracy, training_accuracy = self.get_accuracy(X_batch, y_batch_true, X_val, y_val)
+            training_accuracy, validation_accuracy = self.get_accuracy(X_batch, y_batch_true, X_val, y_val)
 
             # Calculate Mean Squared Error
             training_mse, validation_mse = self.get_mse(y_batch_pred, y_batch_true, y_val_pred, y_val)
@@ -129,6 +129,8 @@ class Model:
             if early_stop:
                 if len(self.validation_losses) > 2 and validation_loss > self.validation_losses[-2]:
                     self.train_patience -= 1
+                else:
+                    self.train_patience = 3
                 if self.train_patience == 0:
                     print(f"epoch {epoch:>4}/{epochs:>4} - Training stopped due to early stopping")
                     break
@@ -137,7 +139,7 @@ class Model:
             self.backward(y_batch_true)
             self.update_weights(learning_rate)
             if epoch % 100 == 0:
-                print(f'epoch {epoch:>4}/{epochs:>4} - loss: {training_loss:>6.6f} val_loss: {validation_loss:>6.6f} acc: {training_accuracy:>3.0f}%, val_acc: {validation_accuracy:>3.0f}%, mse: {training_mse:>6.6f}, val_mse: {validation_mse:>6.6f}')
+                print(f'epoch {epoch:>4}/{epochs:>4} - loss: {training_loss:>4.4f} val_loss: {validation_loss:>4.4f} acc: {training_accuracy:>3.0f}%, val_acc: {validation_accuracy:>3.0f}%, mse: {training_mse:>4.4f}, val_mse: {validation_mse:>4.4f}')
         
         self.plot_loss()
         self.plot_accuracy()
@@ -176,7 +178,7 @@ class Model:
         return np.mean((y_true - y_pred)**2)
     
     def binary_cross_entropy(self, y_true, y_pred):
-        epsilon = 1e-12
+        epsilon = 1e-15
         y_pred = y_pred[:, 1] # Extract probability of class 1
         y_pred = np.clip(y_pred, epsilon, 1. - epsilon)
         return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))

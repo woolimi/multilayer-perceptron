@@ -1,5 +1,3 @@
-import numpy as np
-
 from lib.model import Model
 from lib.data import load_csv, data_processing
 
