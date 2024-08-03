@@ -19,6 +19,7 @@ class InputLayer:
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.early_stop = early_stop
+        self.dropout_mask = None
     
     def count_parameters(self):
         return 0
@@ -32,12 +33,13 @@ class InputLayer:
         }
     
 class DenseLayer:
-    def __init__(self, n_inputs: int, n_neurons: int, activation=None):
+    def __init__(self, n_inputs: int, n_neurons: int, activation=None, dropout=0):
         self.type="DenseLayer"
         self.n_neurons = n_neurons
         self.weights = np.random.randn(n_inputs, n_neurons) * 0.1
         self.biases = np.zeros((1, n_neurons))
         self.activation = activation
+        self.dropout = dropout
     
     def forward(self, inputs, training=True):
         z = np.dot(inputs, self.weights) + self.biases
@@ -49,6 +51,14 @@ class DenseLayer:
         elif self.activation == "relu" or self.activation is None:
             a = relu(z)
 
+        if training and self.dropout > 0:
+            # 1. Create random array by filling the value between 0 - 1
+            # 2. Make dropout mask by checking random array: [True, False, ... ]
+            # 3. Drop values by applying dropout mask
+            self.dropout_mask = np.random.rand(*a.shape) > self.dropout
+            a = a * self.dropout_mask
+            a = (a * self.dropout_mask) / (1 - self.dropout)
+        
         if training:
             self.inputs = inputs
             self.z = z
@@ -57,6 +67,9 @@ class DenseLayer:
 
     
     def backward(self, dA):
+        if self.dropout > 0:
+            dA = (dA * self.dropout_mask) / (1 - self.dropout)
+        
         if self.activation == "relu":
             dZ = relu_backward(dA, self.z)
         elif self.activation == "sigmoid":
@@ -65,9 +78,11 @@ class DenseLayer:
             dZ = softmax_backward(dA)
         else:
             dZ = dA  # No activation
+    
         dW = np.dot(self.inputs.T, dZ)
         db = np.sum(dZ, axis=0, keepdims=True)
         dA_prev = np.dot(dZ, self.weights.T)
+    
         return dW, db, dA_prev
     
     def count_parameters(self):

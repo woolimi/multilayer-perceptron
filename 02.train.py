@@ -19,9 +19,9 @@ if __name__ == "__main__":
     print(warning("\nCreating neural network model..."))
     # ReLU:
     model = Model().create_network([
-        InputLayer(X, y, X_val, y_val, epochs=30000, learning_rate=0.01, batch_size=X.shape[0], early_stop=True),
-        DenseLayer(n_inputs=X.shape[1], n_neurons=20,  activation="relu"),
-        DenseLayer(n_inputs=20, n_neurons=30, activation="relu"),
+        InputLayer(X, y, X_val, y_val, epochs=30000, learning_rate=0.003, batch_size=X.shape[0], early_stop=True),
+        DenseLayer(n_inputs=X.shape[1], n_neurons=30,  activation="relu", dropout=0.2),
+        DenseLayer(n_inputs=30, n_neurons=30, activation="relu", dropout=0.2),
         DenseLayer(n_inputs=30, n_neurons=2, activation="softmax"),
     ])
     # Sigmoid

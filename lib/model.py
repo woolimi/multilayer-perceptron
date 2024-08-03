@@ -5,6 +5,8 @@ import os
 from lib.layer import InputLayer, DenseLayer
 from lib.print import warning
 
+TRAIN_PATIENCE = 2
+
 class Model:
     def __init__(self):
         self.layers = []
@@ -15,7 +17,7 @@ class Model:
         self.training_mses = []
         self.validation_mses = []
         self.inputLayer = None       
-        self.train_patience = 3
+        self.train_patience = TRAIN_PATIENCE
 
     def create_network(self, layers):
         if not isinstance(layers[0], InputLayer):
@@ -130,7 +132,7 @@ class Model:
                 if len(self.validation_losses) > 2 and validation_loss > self.validation_losses[-2]:
                     self.train_patience -= 1
                 else:
-                    self.train_patience = 3
+                    self.train_patience = TRAIN_PATIENCE
                 if self.train_patience == 0:
                     print(f"epoch {epoch:>4}/{epochs:>4} - Training stopped due to early stopping")
                     break
