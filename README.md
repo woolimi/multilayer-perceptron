@@ -96,3 +96,4 @@ The backward pass involves computing the gradients of the loss function with res
   ![Early stop image](https://production-media.paperswithcode.com/methods/Screen_Shot_2020-05-28_at_12.59.56_PM_1D7lrVF.png)
 
 - Evaluate the learning phase with multiple metrics: loss, accuracy, mse
+- relu & sigmoid

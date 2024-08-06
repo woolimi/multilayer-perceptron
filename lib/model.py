@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import json
-import os
 from lib.layer import InputLayer, DenseLayer
 from lib.print import warning
 
@@ -134,14 +133,15 @@ class Model:
                 else:
                     self.train_patience = TRAIN_PATIENCE
                 if self.train_patience == 0:
-                    print(f"epoch {epoch:>4}/{epochs:>4} - Training stopped due to early stopping")
+                    print(f'epoch {epoch:>4}/{epochs:>4} - loss: {training_loss:>4.4f} val_loss: {validation_loss:>4.4f} acc: {training_accuracy:>3.2f}%, val_acc: {validation_accuracy:>3.2f}%, mse: {training_mse:>4.4f}, val_mse: {validation_mse:>4.4f}')
+                    print("Training stopped due to early stopping")
                     break
 
             # Update model
             self.backward(y_batch_true)
             self.update_weights(learning_rate)
             if epoch % 100 == 0:
-                print(f'epoch {epoch:>4}/{epochs:>4} - loss: {training_loss:>4.4f} val_loss: {validation_loss:>4.4f} acc: {training_accuracy:>3.0f}%, val_acc: {validation_accuracy:>3.0f}%, mse: {training_mse:>4.4f}, val_mse: {validation_mse:>4.4f}')
+                print(f'epoch {epoch:>4}/{epochs:>4} - loss: {training_loss:>4.4f} val_loss: {validation_loss:>4.4f} acc: {training_accuracy:>3.2f}%, val_acc: {validation_accuracy:>3.2f}%, mse: {training_mse:>4.4f}, val_mse: {validation_mse:>4.4f}')
         
         self.plot_loss()
         self.plot_accuracy()
