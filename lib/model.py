@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 from lib.layer import InputLayer, DenseLayer
-from lib.print import warning
+import os
 
 TRAIN_PATIENCE = 2
 
@@ -57,7 +57,7 @@ class Model:
         plt.legend()
         plt.savefig('plot-loss.png')
         plt.close()
-        # os.system("xdg-open plot-loss.png")
+        os.system("xdg-open plot-loss.png")
 
     def plot_accuracy(self):
         plt.plot(self.training_accuracy, label='Training Accuracy')
@@ -65,7 +65,7 @@ class Model:
         plt.legend()
         plt.savefig('plot-accuracy.png')
         plt.close()
-        # os.system("xdg-open plot-accuracy.png")
+        os.system("xdg-open plot-accuracy.png")
 
     
     def plot_mse(self):
@@ -74,7 +74,7 @@ class Model:
         plt.legend()
         plt.savefig('plot-mse.png')
         plt.close()
-        # os.system("xdg-open plot-mse.png")
+        os.system("xdg-open plot-mse.png")
 
 
     def get_losses(self, y_batch_pred, y_batch_true, y_val_pred, y_val):
