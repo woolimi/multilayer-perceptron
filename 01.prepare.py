@@ -10,7 +10,7 @@ if __name__ == "__main__":
     df = load_csv("./data.csv")
 
     print(warning("Creating train and test datasets..."))
-    df_train = df.sample(frac=0.50)
+    df_train = df.sample(frac=0.50, random_state=2)
     df_validate = df.drop(df_train.index)
 
     # Create train and test files
